@@ -1,0 +1,57 @@
+#include <stdio.h>
+#include <stdlib.h>  // system() 사용
+#include <unistd.h>  // usleep() 사용 (Windows는 Sleep() 필요)
+
+#ifdef _WIN32
+    #include <windows.h>
+    void gotoxy(int x, int y) {
+        COORD coord;
+        coord.X = x;
+        coord.Y = y;
+        SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+    }
+    #define SLEEP(ms) Sleep(ms)
+#else
+    #define gotoxy(x, y) printf("\033[%d;%dH", (y), (x))
+    #define SLEEP(ms) usleep((ms) * 1000) // usleep은 마이크로초 단위
+#endif
+
+// 슬롯머신 스타일 애니메이션
+void slotMachineAnimation(int maxNum, int speed) {
+    int ones = 0, tens = 0, hundreds = 0, thousands = 0; // 일, 십, 백의 자리
+    int i;
+
+    // 콘솔 초기화
+    printf("\n\n");
+
+    // 커서 위치 저장 (ANSI 이스케이프 코드 활용)
+    gotoxy(5, 10); // 첫 번째 숫자 위치
+
+    for (i = 0; i <= maxNum; i++) {
+        ones = i % 10;           // 1의 자리
+        tens = (i / 10) % 10;    // 10의 자리
+        hundreds = (i / 100) % 10; // 100의 자리
+        thousands = (i / 1000) % 10; // 1000의 자리
+        
+
+        // 숫자 출력 (커서 이동 후 덮어쓰기)
+        gotoxy(5, 10); printf("%d", thousands);
+        gotoxy(10, 10); printf("%d", hundreds);
+        gotoxy(15, 10); printf("%d", tens);
+        gotoxy(20, 10); printf("%d", ones);
+        fflush(stdout); // 즉시 출력 반영
+
+        SLEEP(speed); // 50ms 딜레이 (속도 조절 가능)
+    }
+
+    printf("\n\n");
+}
+
+int main() {
+    int n, speed;
+    scanf("%d\n", &n);
+    scanf("%d", &speed);
+    // 슬롯머신 애니메이션 실행
+    slotMachineAnimation(n, speed);
+    return 0;
+}
